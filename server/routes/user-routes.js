@@ -7,7 +7,7 @@ const awsConfig = {
 };
 AWS.config.update(awsConfig);
 const dynamodb = new AWS.DynamoDB.DocumentClient();
-const table = "Thoughts";
+const table = "LakerThoughts";
 
 router.get("/users", (req, res) => {
   const params = {
@@ -33,12 +33,14 @@ router.get("/users/:username", (req, res) => {
     ExpressionAttributeNames: {
       "#un": "username",
       "#ca": "createdAt",
-      "#th": "thought"
+      "#th": "thought",
+      "#img": "image"
     },
     ExpressionAttributeValues: {
       ":user": req.params.username
     },
-    ScanIndexForward: false
+    ProjectionExpression: "#un, #th, #ca, #img", 
+    ScanIndexForward: false 
   };
   dynamodb.query(params, (err, data) => {
     if (err) {
@@ -59,7 +61,8 @@ router.post("/users", (req, res) => {
     Item: {
       username: req.body.username,
       createdAt: Date.now(),
-      thought: req.body.thought
+      thought: req.body.thought,
+      image: req.body.image
     }
   };
   dynamodb.put(params, (err, data) => {
